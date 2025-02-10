@@ -1,0 +1,8 @@
+[package]
+name = "pairer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+env_logger = "0.11.6"
+genetic_algorithm = "0.18.1"
