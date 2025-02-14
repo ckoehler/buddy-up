@@ -2,6 +2,10 @@
 
 Pair up a group of people without (much) repetition. And keep doing it, we keep history!
 
+## Installation
+
+Head to the [Releases](https://github.com/ckoehler/buddy-up/releases/latest) and download the binary for your platform.
+
 ## How to Use
 
 `buddy --help` has good info. 
@@ -57,3 +61,22 @@ Ids need to be unique and positive, and there need to be an even number of peopl
 ## Output
 
 The pairs are saved as history into the directory given, as JSON.
+
+## How it Works
+
+### The Problem
+
+Pairing up people is hard. There are algorithms and tools out there to do it, but I hadn't found one that takes into account a 
+changing group and (implied) doesn't require all the pairings to be calculated up front.
+
+### The Solution
+
+`Buddy-Up` generates pairs from the given input, then saves the pairings in the history. The next time `Buddy-Up` is run, it reads the history 
+and takes it into account in calculating new pairings, which should be unique, at least until everyone has been paired up once already.
+
+Because the problem space is potentially huge, `Buddy-Up` uses a genetic algorithm to come up with the best pairings. I think it works pretty well, but isn't 
+perfect. Feel free to open an issue if you have ideas for improving it.
+
+### The Math
+
+TODO
