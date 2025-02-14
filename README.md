@@ -2,6 +2,37 @@
 
 Pair up a group of people without (much) repetition.
 
+## How to Use
+
+`buddy --help` has good info. You could run it like this:
+
+`buddy pair --input people.csv --output-dir meeting`
+
+Depending on the input, you'll get a table showing the pairings, something like this. 
+
+```
++---------+-------+
+| Alice   | Frank |
+|---------+-------|
+| Bob     | David |
+|---------+-------|
+| Peter   | John  |
+|---------+-------|
+| Charlie | Karl  |
+|---------+-------|
+| Bjorn   | Simon |
++---------+-------+
+```
+
+The history of pairs is saved in the `output-dir`
+
+```
+❯ ls meeting/
+ 20250213_205644.json
+```
+
+Feel free to manually edit the history files, they are just JSON.
+
 ## Input
 
 CSV file of the format:
