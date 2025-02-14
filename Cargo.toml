@@ -2,7 +2,7 @@
 name = "buddy-up"
 version = "0.1.1"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
-description = "Probe is a TUI ZMQ PUB/SUB monitor and debugger."
+description = "Buddy up a changing group of people into unique pairs over time."
 edition = "2021"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ckoehler/buddy-up"
