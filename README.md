@@ -1,10 +1,11 @@
 # Buddy-Up 🎉🥳  [![Continuous Integration](https://github.com/ckoehler/buddy-up/actions/workflows/ci.yml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/ci.yml) [![Continuous Deployment](https://github.com/ckoehler/buddy-up/actions/workflows/cd.yaml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/cd.yaml) [![Release](https://github.com/ckoehler/buddy-up/actions/workflows/release.yml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/release.yml)
 
-Pair up a group of people without (much) repetition. And keep doing it, we keep history!
+Buddy up a changing group of people into unique pairs over time.
 
 ## Installation
 
-Head to the [Releases](https://github.com/ckoehler/buddy-up/releases/latest) and download the binary for your platform.
+- Head to the [Releases](https://github.com/ckoehler/buddy-up/releases/latest) and download the binary for your platform.
+- Install with Cargo: `cargo install --locked buddy-up`
 
 ## How to Use
 
