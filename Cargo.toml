@@ -1,7 +1,14 @@
 [package]
 name = "buddy-up"
 version = "0.1.0"
+authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
+description = "Probe is a TUI ZMQ PUB/SUB monitor and debugger."
 edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ckoehler/buddy-up"
+readme = "README.md"
+publish = true
+
 
 [dependencies]
 anyhow = "1.0.95"
