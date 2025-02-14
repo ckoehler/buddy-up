@@ -2,6 +2,7 @@ mod history;
 use genetic_algorithm::{chromosome::GenesOwner, strategy::evolve::prelude::*};
 use serde::Deserialize;
 use serde::Serialize;
+use tracing::{debug, trace};
 
 pub use history::merge;
 pub use history::History;
@@ -32,15 +33,15 @@ pub fn pair(ids: Vec<usize>, last: &History) -> Vec<(usize, usize)> {
         .build()
         .unwrap();
 
-    //println!("{}", genotype);
+    debug!("{genotype}");
 
     let mut evolve = Evolve::builder()
         .with_genotype(genotype)
-        .with_target_population_size(20)
-        .with_max_stale_generations(100)
+        .with_target_population_size(50)
+        .with_max_stale_generations(1000)
         .with_fitness(PairFitness::new(last.clone()))
         .with_fitness_ordering(FitnessOrdering::Minimize)
-        //.with_target_fitness_score(0)
+        .with_target_fitness_score(0)
         //.with_par_fitness(true)
         .with_replace_on_equal_fitness(true)
         .with_mutate(MutateSingleGene::new(0.2))
@@ -78,19 +79,28 @@ impl Fitness for PairFitness {
         _genotype: &FitnessGenotype<Self>,
     ) -> Option<FitnessValue> {
         let mut score = 0;
-        //println!("Chr: {:?}", chromosome.genes());
         chromosome.genes().chunks(2).for_each(|chunk| {
             let (i, j) = (chunk[0], chunk[1]);
-            //println!("pair: {:?}", (i, j));
 
             let last = match self.last.get((i, j)) {
-                Some(x) => x,
-                None => self.last.get((j, i)).unwrap_or(0),
+                Some(x) => {
+                    trace!("Found score {x} for pair ({i}, {j}).");
+                    x
+                }
+                None => {
+                    if let Some(x) = self.last.get((j, i)) {
+                        trace!("Found score {x} for pair ({j}, {i}).");
+                        x
+                    } else {
+                        trace!("Found no score for pair ({j}, {i}), using 0");
+                        0
+                    }
+                }
             };
-            //println!("last: {:?}", last);
             // high score should be bad
             score += last as isize;
         });
+        trace!("Score for chromosome {:?}: {score}", chromosome.genes());
         Some(score)
     }
 }

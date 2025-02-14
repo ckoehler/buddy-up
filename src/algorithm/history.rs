@@ -27,8 +27,7 @@ impl History {
         }
     }
 
-    #[allow(dead_code)]
-    fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.0.len()
     }
 
@@ -43,8 +42,15 @@ impl History {
         })
     }
 
-    pub fn values(&self) -> Vec<usize> {
-        self.0.values().copied().collect()
+    //pub fn values(&self) -> Vec<usize> {
+    //    self.0.values().copied().collect()
+    //}
+
+    pub fn min(&self) -> usize {
+        *self.0.values().min().unwrap_or(&0)
+    }
+    pub fn max(&self) -> usize {
+        *self.0.values().max().unwrap_or(&0)
     }
 }
 
