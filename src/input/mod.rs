@@ -28,7 +28,9 @@ pub fn process(input: &Path) -> Result<HashMap<usize, String>> {
         anyhow::bail!("Ids in the input are not unique. Aborting...");
     }
     if people.len() % 2 != 0 {
-        anyhow::bail!("Number of inputs is not even. Can't currently handle that. Maybe add a dummy user with id 999999 for now?");
+        anyhow::bail!(
+            "Number of inputs is not even. Can't currently handle that. Maybe add a dummy user with id 999999 for now?"
+        );
     }
 
     info!("Found {} records in input file.", people.len());
