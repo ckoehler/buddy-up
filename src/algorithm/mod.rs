@@ -4,8 +4,8 @@ use serde::Deserialize;
 use serde::Serialize;
 use tracing::{debug, trace};
 
-pub use history::merge;
 pub use history::History;
+pub use history::merge;
 
 #[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
 pub struct Person {

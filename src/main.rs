@@ -2,9 +2,9 @@ mod algorithm;
 mod input;
 mod output;
 
-use algorithm::merge;
 use algorithm::History;
 use algorithm::Person;
+use algorithm::merge;
 use anyhow::Context;
 use anyhow::Result;
 use clap::{Parser, Subcommand};
@@ -82,7 +82,9 @@ fn pair(input: &Path, output_dir: &Path) -> Result<()> {
     }
     let tr_num_pairs = history.len();
     let tr_max_num_pairs = (people.len().pow(2) - people.len()) / 2;
-    info!("Read {tr_history_files} history files, found {tr_num_pairs} existing pairs (max possible: {tr_max_num_pairs}).");
+    info!(
+        "Read {tr_history_files} history files, found {tr_num_pairs} existing pairs (max possible: {tr_max_num_pairs})."
+    );
     debug!("History min iterations: {}", history.min());
     debug!("History max iterations: {}", history.max());
 
