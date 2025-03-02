@@ -4,10 +4,28 @@ use std::io::BufReader;
 use std::io::Read;
 use tracing::info;
 
+/// Abstraction over all the people you may want to pair up.
+/// Give it a impl [`Read`], like a file, to get [`People`] back.
+///
+/// Example:
+/// ```ignore
+/// # use std::fs::File;
+/// # use buddy_up_lib::People;
+/// let f = File::open("people.csv")?;
+/// let people = People::from_csv(f)?;
+/// ```
 #[derive(Debug)]
 pub struct People(HashMap<usize, String>);
 
 impl People {
+    /// Reads people from a CSV file and creates a `People` struct from that.
+    /// The expected format is rows of people like `id,name`.
+    ///
+    /// Example CSV:
+    /// ```text
+    /// 1,John
+    /// 2,David
+    /// ```
     pub fn from_csv<R: Read>(input: R) -> Result<Self, BuddyError> {
         let reader = BufReader::new(input);
         let mut rdr = csv::ReaderBuilder::new()

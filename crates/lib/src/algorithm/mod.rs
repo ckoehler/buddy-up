@@ -16,6 +16,8 @@ impl Pairs {
     }
 }
 
+/// This function does the pairing magic. Given some [`People`] and a [`History`] of past pairings,
+/// it'll output a new set of [`Pairs`].
 pub fn pair(people: People, last: &History) -> Pairs {
     let ids = people.as_ids();
 

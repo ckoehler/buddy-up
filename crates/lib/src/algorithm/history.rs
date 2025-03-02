@@ -6,6 +6,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use tracing::debug;
 
+/// Contains history of past pairings
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct History {
     map: HashMap<(usize, usize), usize>,
@@ -107,8 +108,10 @@ fn merge(history: &mut History, pairs: &Vec<(usize, usize)>) {
     }
 }
 
+/// Saves some stats about the [`History`].
 #[derive(Debug, Copy, Clone, Default)]
 pub struct HistoryStats {
+    /// How many files of history were read
     pub files_read: usize,
 
     /// How many existing [`Pairs`][crate::Pairs] are in the history.
