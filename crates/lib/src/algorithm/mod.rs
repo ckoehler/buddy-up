@@ -1,30 +1,7 @@
-mod history;
+pub mod history;
 use genetic_algorithm::{chromosome::GenesOwner, strategy::evolve::prelude::*};
-use serde::Deserialize;
-use serde::Serialize;
+use history::History;
 use tracing::{debug, trace};
-
-pub use history::History;
-pub use history::merge;
-
-#[derive(Debug, Clone, Hash, Eq, PartialEq, Serialize, Deserialize)]
-pub struct Person {
-    pub id: usize,
-    name: String,
-}
-
-impl std::fmt::Display for Person {
-    // This trait requires `fmt` with this exact signature.
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.name)
-    }
-}
-
-impl Person {
-    pub fn new(id: usize, name: String) -> Self {
-        Self { id, name }
-    }
-}
 
 pub fn pair(ids: Vec<usize>, last: &History) -> Vec<(usize, usize)> {
     //let len = ids.len();

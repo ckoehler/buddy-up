@@ -1,14 +1,9 @@
-mod algorithm;
-mod input;
-mod output;
-
-use algorithm::History;
-use algorithm::Person;
-use algorithm::merge;
 use anyhow::Context;
 use anyhow::Result;
+use buddy_up_lib::History;
+use buddy_up_lib::Person;
+use buddy_up_lib::{json_history, print_table, process};
 use clap::{Parser, Subcommand};
-use glob::glob;
 use std::path::Path;
 use std::path::PathBuf;
 use tracing::{debug, info};
@@ -62,26 +57,17 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn pair(input: &Path, output_dir: &Path) -> Result<()> {
-    let output_dir = output_dir.to_string_lossy();
+fn pair(input: &Path, history_dir: &Path) -> Result<()> {
+    let output_dir = history_dir.to_string_lossy();
 
-    let people = input::process(input)?;
+    let people = process(input)?;
 
     // generate history from pair files
-    let mut history = History::new();
-    // read pairs from dir of files
-    let pattern = format!("{output_dir}/*.json");
-    let mut tr_history_files = 0;
-    for path in glob(&pattern).expect("Glob pattern works") {
-        debug!("Reading history file {path:?}");
-        let pairs = std::fs::read_to_string(path?)?;
-        let pairs: Vec<(Person, Person)> = serde_json::from_str(&pairs)?;
-        let pairs = pairs.iter().map(|p| (p.0.id, p.1.id)).collect();
-        tr_history_files += 1;
-        merge(&mut history, &pairs);
-    }
-    let tr_num_pairs = history.len();
+    let history = History::from_dir(&output_dir)?;
+
+    let tr_num_pairs = history.stats().pairs;
     let tr_max_num_pairs = (people.len().pow(2) - people.len()) / 2;
+    let tr_history_files = history.stats().files_read;
     info!(
         "Read {tr_history_files} history files, found {tr_num_pairs} existing pairs (max possible: {tr_max_num_pairs})."
     );
@@ -91,7 +77,7 @@ fn pair(input: &Path, output_dir: &Path) -> Result<()> {
     // the algorithm only operates on ids, so get those only. We can map them back to names for
     // output later.
     let people_ids = people.keys().copied().collect();
-    let pairs = algorithm::pair(people_ids, &history);
+    let pairs = buddy_up_lib::pair(people_ids, &history);
 
     // put names back into the pairs for saving
     let pairs: Vec<(Person, Person)> = pairs
@@ -106,10 +92,10 @@ fn pair(input: &Path, output_dir: &Path) -> Result<()> {
 
     // serialize to json and save
     // TODO: that type gymnastic tho
-    output::json_history(&pairs, output_dir.into_owned().into()).context("Saving history")?;
+    json_history(&pairs, output_dir.into_owned().into()).context("Saving history")?;
 
     // now print the pairs
-    output::print_table(&pairs);
+    print_table(&pairs);
     Ok(())
 }
 
