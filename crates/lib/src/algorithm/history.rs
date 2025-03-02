@@ -1,5 +1,5 @@
+use crate::BuddyError;
 use crate::Person;
-use anyhow::Result;
 use glob::glob;
 use serde::Deserialize;
 use serde::Serialize;
@@ -20,12 +20,15 @@ impl Default for History {
 }
 
 impl History {
-    pub fn from_dir(dir: &str) -> Result<Self> {
+    /// Usually the history is saved in some directory. Give it a directory name to read that
+    /// history. If you're just starting out, give it the desired directory. If it doesn't exist,
+    /// it will be created.
+    pub fn from_dir(dir: &str) -> Result<Self, BuddyError> {
         let mut history = Self::new();
 
         // read pairs from dir of files
         let pattern = format!("{dir}/*.json");
-        for path in glob(&pattern).expect("Glob pattern works") {
+        for path in glob(&pattern)? {
             debug!("Reading history file {path:?}");
             let pairs = std::fs::read_to_string(path?)?;
             let pairs: Vec<(Person, Person)> = serde_json::from_str(&pairs)?;
@@ -107,6 +110,8 @@ fn merge(history: &mut History, pairs: &Vec<(usize, usize)>) {
 #[derive(Debug, Copy, Clone, Default)]
 pub struct HistoryStats {
     pub files_read: usize,
+
+    /// How many existing [`Pairs`][crate::Pairs] are in the history.
     pub pairs: usize,
 }
 

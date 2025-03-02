@@ -1,6 +1,5 @@
-use crate::Person;
-use anyhow::Context;
-use anyhow::Result;
+use crate::BuddyError;
+use crate::Pairs;
 use chrono::Local;
 use comfy_table::Table;
 use std::fs::File;
@@ -8,7 +7,7 @@ use std::io::Write;
 use std::path::PathBuf;
 use tracing::info;
 
-pub fn json_history(pairs: &[(Person, Person)], dir: PathBuf) -> Result<()> {
+pub fn save_history(pairs: &Pairs, dir: &str) -> Result<(), BuddyError> {
     // serialize to json and save
     let json = serde_json::to_string_pretty(&pairs)?;
     let date_time = Local::now();
@@ -18,7 +17,7 @@ pub fn json_history(pairs: &[(Person, Person)], dir: PathBuf) -> Result<()> {
     let mut path = PathBuf::new();
     path.push(dir);
     if !path.exists() {
-        std::fs::create_dir_all(&path).context("Creating output directory.")?;
+        std::fs::create_dir_all(&path)?;
     }
     path.push(filename);
 
@@ -28,10 +27,10 @@ pub fn json_history(pairs: &[(Person, Person)], dir: PathBuf) -> Result<()> {
     Ok(())
 }
 
-pub fn print_table(pairs: &[(Person, Person)]) {
+pub fn print_table(pairs: Pairs) {
     // now print the pairs
     let mut table = Table::new();
-    for pair in pairs {
+    for pair in pairs.inner() {
         table.add_row(vec![pair.0.clone(), pair.1.clone()]);
     }
     println!("{table}");
