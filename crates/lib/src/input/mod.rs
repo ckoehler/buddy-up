@@ -11,7 +11,6 @@ pub fn process(input: &Path) -> Result<HashMap<usize, String>> {
     let mut rdr = csv::ReaderBuilder::new()
         .has_headers(false)
         .from_reader(reader);
-    // TODO: check for unique ids somewhere here
     let mut people = HashMap::new();
     let mut tr_input_len = 0;
     for rec in rdr.records() {

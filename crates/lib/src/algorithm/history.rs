@@ -1,60 +1,98 @@
+use crate::Person;
+use anyhow::Result;
+use glob::glob;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
+use tracing::debug;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct History(HashMap<(usize, usize), usize>);
+pub struct History {
+    map: HashMap<(usize, usize), usize>,
+    #[serde(skip)]
+    stats: HistoryStats,
+}
+
+impl Default for History {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl History {
-    #[allow(dead_code)]
-    fn max_iteration(&self) -> usize {
-        *self.0.values().max().unwrap_or(&0)
+    pub fn from_dir(dir: &str) -> Result<Self> {
+        let mut history = Self::new();
+
+        // read pairs from dir of files
+        let pattern = format!("{dir}/*.json");
+        for path in glob(&pattern).expect("Glob pattern works") {
+            debug!("Reading history file {path:?}");
+            let pairs = std::fs::read_to_string(path?)?;
+            let pairs: Vec<(Person, Person)> = serde_json::from_str(&pairs)?;
+            let pairs = pairs.iter().map(|p| (p.0.id, p.1.id)).collect();
+            history.stats.files_read += 1;
+            merge(&mut history, &pairs);
+        }
+        history.stats.pairs = history.len();
+        Ok(history)
     }
 
-    pub fn new() -> Self {
+    #[allow(dead_code)]
+    fn max_iteration(&self) -> usize {
+        *self.map.values().max().unwrap_or(&0)
+    }
+
+    fn new() -> Self {
         let scores = HashMap::new();
-        Self(scores)
+        Self {
+            map: scores,
+            stats: HistoryStats::default(),
+        }
+    }
+
+    pub fn stats(&self) -> HistoryStats {
+        self.stats
     }
 
     fn insert(&mut self, pair: (usize, usize), iteration: usize) {
         // if the first variation of the pair exists, insert it there; if not
         // it doesn't really matter if the other one exists, just insert it as the other.
         // Whether that one exists or not, it'll insert there.
-        if self.0.contains_key(&pair) {
-            self.0.insert(pair, iteration);
+        if self.map.contains_key(&pair) {
+            self.map.insert(pair, iteration);
         } else {
-            self.0.insert((pair.1, pair.0), iteration);
+            self.map.insert((pair.1, pair.0), iteration);
         }
     }
 
     pub fn len(&self) -> usize {
-        self.0.len()
+        self.map.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     fn contains(&self, pair: &(usize, usize)) -> bool {
-        self.0.contains_key(pair) || self.0.contains_key(&(pair.1, pair.0))
+        self.map.contains_key(pair) || self.map.contains_key(&(pair.1, pair.0))
     }
 
     pub fn get(&self, pair: (usize, usize)) -> Option<usize> {
-        Some(match self.0.get(&pair) {
+        Some(match self.map.get(&pair) {
             Some(x) => *x,
-            None => *self.0.get(&(pair.1, pair.0))?,
+            None => *self.map.get(&(pair.1, pair.0))?,
         })
     }
 
-    //pub fn values(&self) -> Vec<usize> {
-    //    self.0.values().copied().collect()
-    //}
-
     pub fn min(&self) -> usize {
-        *self.0.values().min().unwrap_or(&0)
+        *self.map.values().min().unwrap_or(&0)
     }
     pub fn max(&self) -> usize {
-        *self.0.values().max().unwrap_or(&0)
+        *self.map.values().max().unwrap_or(&0)
     }
 }
 
-pub fn merge(history: &mut History, pairs: &Vec<(usize, usize)>) {
+fn merge(history: &mut History, pairs: &Vec<(usize, usize)>) {
     for p in pairs {
         if history.contains(p) {
             let it = history.get(*p).unwrap();
@@ -64,6 +102,12 @@ pub fn merge(history: &mut History, pairs: &Vec<(usize, usize)>) {
             history.insert(*p, 1);
         }
     }
+}
+
+#[derive(Debug, Copy, Clone, Default)]
+pub struct HistoryStats {
+    pub files_read: usize,
+    pub pairs: usize,
 }
 
 #[cfg(test)]
