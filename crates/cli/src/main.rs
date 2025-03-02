@@ -3,6 +3,7 @@ use buddy_up_lib::History;
 use buddy_up_lib::People;
 use buddy_up_lib::{print_table, save_history};
 use clap::{Parser, Subcommand};
+use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 use tracing::{debug, info};
@@ -59,7 +60,8 @@ fn main() -> Result<()> {
 fn pair(input: &Path, history_dir: &Path) -> Result<()> {
     let output_dir = history_dir.to_string_lossy();
 
-    let people = People::from_csv(input)?;
+    let f = File::open(input)?;
+    let people = People::from_csv(f)?;
 
     // generate history from pair files
     let history = History::from_dir(&output_dir)?;
