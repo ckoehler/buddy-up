@@ -1,5 +1,6 @@
 use crate::BuddyError;
 use std::collections::HashMap;
+use std::fmt::Display;
 use std::io::BufReader;
 use std::io::Read;
 use tracing::info;
@@ -18,6 +19,16 @@ use tracing::info;
 pub struct People {
     people: HashMap<usize, String>,
     evenizer: bool,
+}
+
+impl Display for People {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut out = Vec::new();
+        for person in self.people.clone() {
+            out.push(person.1);
+        }
+        write!(f, "{}", out.join("\n"))
+    }
 }
 
 impl People {

@@ -80,7 +80,7 @@ fn pair(input: &Path, history_dir: &Path) -> Result<()> {
     buddy_up_lib::save_history(&pairs, &output_dir)?;
 
     // now print the pairs
-    buddy_up_lib::print_table(pairs);
+    println!("{}", buddy_up_lib::print_table(pairs));
     Ok(())
 }
 
