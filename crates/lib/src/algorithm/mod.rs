@@ -1,10 +1,24 @@
 pub mod history;
+use crate::People;
+use crate::Person;
 use genetic_algorithm::{chromosome::GenesOwner, strategy::evolve::prelude::*};
 use history::History;
+use serde::Deserialize;
+use serde::Serialize;
 use tracing::{debug, trace};
 
-pub fn pair(ids: Vec<usize>, last: &History) -> Vec<(usize, usize)> {
-    //let len = ids.len();
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Pairs(Vec<(Person, Person)>);
+
+impl Pairs {
+    pub fn inner(self) -> Vec<(Person, Person)> {
+        self.0
+    }
+}
+
+pub fn pair(people: People, last: &History) -> Pairs {
+    let ids = people.as_ids();
+
     let genotype = UniqueGenotype::builder()
         .with_allele_list(ids)
         .build()
@@ -33,8 +47,17 @@ pub fn pair(ids: Vec<usize>, last: &History) -> Vec<(usize, usize)> {
         .best_genes()
         .expect("Something went wrong getting best genes");
 
-    let pairs = genes.chunks(2).map(|c| (c[0], c[1])).collect();
-    pairs
+    let pairs: Vec<(usize, usize)> = genes.chunks(2).map(|c| (c[0], c[1])).collect();
+    let pairs: Vec<(Person, Person)> = pairs
+        .iter()
+        .map(|(id1, id2)| {
+            (
+                Person::new(*id1, people.name_from_id(*id1).unwrap()),
+                Person::new(*id2, people.name_from_id(*id2).unwrap()),
+            )
+        })
+        .collect();
+    Pairs(pairs)
 }
 
 #[derive(Clone, Debug)]

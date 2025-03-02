@@ -1,8 +1,7 @@
-use anyhow::Context;
 use anyhow::Result;
 use buddy_up_lib::History;
-use buddy_up_lib::Person;
-use buddy_up_lib::{json_history, print_table, process};
+use buddy_up_lib::People;
+use buddy_up_lib::{print_table, save_history};
 use clap::{Parser, Subcommand};
 use std::path::Path;
 use std::path::PathBuf;
@@ -60,7 +59,7 @@ fn main() -> Result<()> {
 fn pair(input: &Path, history_dir: &Path) -> Result<()> {
     let output_dir = history_dir.to_string_lossy();
 
-    let people = process(input)?;
+    let people = People::from_csv(input)?;
 
     // generate history from pair files
     let history = History::from_dir(&output_dir)?;
@@ -74,28 +73,13 @@ fn pair(input: &Path, history_dir: &Path) -> Result<()> {
     debug!("History min iterations: {}", history.min());
     debug!("History max iterations: {}", history.max());
 
-    // the algorithm only operates on ids, so get those only. We can map them back to names for
-    // output later.
-    let people_ids = people.keys().copied().collect();
-    let pairs = buddy_up_lib::pair(people_ids, &history);
-
-    // put names back into the pairs for saving
-    let pairs: Vec<(Person, Person)> = pairs
-        .iter()
-        .map(|(id1, id2)| {
-            (
-                Person::new(*id1, people.get(id1).unwrap().to_string()),
-                Person::new(*id2, people.get(id2).unwrap().to_string()),
-            )
-        })
-        .collect();
+    let pairs = buddy_up_lib::pair(people, &history);
 
     // serialize to json and save
-    // TODO: that type gymnastic tho
-    json_history(&pairs, output_dir.into_owned().into()).context("Saving history")?;
+    save_history(&pairs, &output_dir)?;
 
     // now print the pairs
-    print_table(&pairs);
+    print_table(pairs);
     Ok(())
 }
 
