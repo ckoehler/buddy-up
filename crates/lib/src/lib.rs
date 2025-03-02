@@ -1,3 +1,4 @@
+//! The Buddy Up Lib contains all the brains to generate pairs from people.
 mod algorithm;
 mod input;
 mod output;
@@ -15,6 +16,7 @@ pub use output::*;
 use serde::Deserialize;
 use serde::Serialize;
 
+/// Defines the Errors we might encounter
 #[derive(Error, Debug)]
 pub enum BuddyError {
     #[error("Couldn't read files.")]

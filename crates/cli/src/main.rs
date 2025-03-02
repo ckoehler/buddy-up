@@ -1,7 +1,6 @@
 use anyhow::Result;
 use buddy_up_lib::History;
 use buddy_up_lib::People;
-use buddy_up_lib::{print_table, save_history};
 use clap::{Parser, Subcommand};
 use std::fs::File;
 use std::path::Path;
@@ -63,7 +62,7 @@ fn pair(input: &Path, history_dir: &Path) -> Result<()> {
     let f = File::open(input)?;
     let people = People::from_csv(f)?;
 
-    // generate history from pair files
+    // generate history from history directory (which contains the pairing files)
     let history = History::from_dir(&output_dir)?;
 
     let tr_num_pairs = history.stats().pairs;
@@ -78,10 +77,10 @@ fn pair(input: &Path, history_dir: &Path) -> Result<()> {
     let pairs = buddy_up_lib::pair(people, &history);
 
     // serialize to json and save
-    save_history(&pairs, &output_dir)?;
+    buddy_up_lib::save_history(&pairs, &output_dir)?;
 
     // now print the pairs
-    print_table(pairs);
+    buddy_up_lib::print_table(pairs);
     Ok(())
 }
 
