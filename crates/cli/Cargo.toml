@@ -14,7 +14,7 @@ anyhow = "1.0.96"
 clap = { version = "4.5.31", features = ["derive"] }
 glob = "0.3.2"
 serde = { version = "1.0.218", features = ["derive"] }
-serde_json = "1.0.139"
+serde_json = "1.0.140"
 buddy-up-lib.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
