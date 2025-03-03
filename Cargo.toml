@@ -3,7 +3,7 @@ members = ["crates/cli", "crates/lib"]
 resolver = "3"
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.3"
 authors = ["Christoph Koehler <christoph@zerodeviation.net>"]
 edition = "2024"
 license = "MIT OR Apache-2.0"
@@ -11,7 +11,7 @@ repository = "https://github.com/ckoehler/buddy-up"
 readme = "README.md"
 
 [workspace.dependencies]
-buddy-up-lib = { version = "0.1.2", path = "crates/lib"}
+buddy-up-lib = { version = "0.1.3", path = "crates/lib"}
 tracing = { version = "0.1.41", features = ["log"] }
 tracing-subscriber = { version = "0.3.19", features = ["env-filter", "ansi"] }
 tracing-error = "0.2.1"
