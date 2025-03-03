@@ -9,7 +9,7 @@ repository.workspace = true
 publish = true
 
 [dependencies]
-thiserror = "2.0.11"
+thiserror = "2.0.12"
 chrono = "0.4.40"
 comfy-table = "7.1.4"
 csv = "1.3.1"
