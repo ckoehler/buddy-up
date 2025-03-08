@@ -40,9 +40,6 @@ pub enum BuddyError {
     #[error("The given IDs are not unique. Check input.")]
     IdsNotUnique,
 
-    #[error("The number of people given is not even and cannot be paired.")]
-    NotEven,
-
     #[error("Couldn't make a History path. Check the history directory.")]
     HistoryDirectoryError(#[from] GlobError),
 
