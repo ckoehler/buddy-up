@@ -14,8 +14,11 @@ use tracing::info;
 /// let f = File::open("people.csv")?;
 /// let people = People::from_csv(f)?;
 /// ```
-#[derive(Debug)]
-pub struct People(HashMap<usize, String>);
+#[derive(Clone, Debug, Default)]
+pub struct People {
+    people: HashMap<usize, String>,
+    evenizer: bool,
+}
 
 impl People {
     /// Reads people from a CSV file and creates a `People` struct from that.
@@ -26,6 +29,13 @@ impl People {
     /// 1,John
     /// 2,David
     /// ```
+    ///
+    /// If the given input doesn't contain an even number of people, we will add our own with id
+    /// `usize::MAX`, so that id is reserved.
+    /// Having that extra user to make it even will keep the algorithm working, so that someone
+    /// will be "paired up" with our evenizer, which really means that person won't get paired.
+    /// The beautiful thing is that the algorithm will try and not repeat pairs, which now includes
+    /// the evenizer, so the same person will not end up getting not paired all the time.
     pub fn from_csv<R: Read>(input: R) -> Result<Self, BuddyError> {
         let reader = BufReader::new(input);
         let mut rdr = csv::ReaderBuilder::new()
@@ -47,17 +57,38 @@ impl People {
         if people.len() != tr_input_len {
             return Err(BuddyError::IdsNotUnique);
         }
-        if people.len() % 2 != 0 {
-            return Err(BuddyError::NotEven);
-        }
+        let ret = if people.len() % 2 != 0 {
+            people.insert(usize::MAX, "EVENIZER".to_string());
+            tracing::warn!(
+                "Input people are not even in number, so we can't pair everyone. One person will be left unpaired."
+            );
+            People {
+                people,
+                evenizer: true,
+            }
+        } else {
+            People {
+                people,
+                evenizer: false,
+            }
+        };
 
-        info!("Found {} records in input file.", people.len());
+        info!("Found {} records in input file.", ret.len());
 
-        Ok(People(people))
+        Ok(ret)
     }
 
     pub fn len(&self) -> usize {
-        self.0.len()
+        if self.has_evenizer() {
+            self.people.len() - 1
+        } else {
+            self.people.len()
+        }
+    }
+
+    /// Whether this People set has our evenizer user to make the count even.
+    pub fn has_evenizer(&self) -> bool {
+        self.evenizer
     }
 
     pub fn is_empty(&self) -> bool {
@@ -65,11 +96,11 @@ impl People {
     }
 
     pub(crate) fn as_ids(&self) -> Vec<usize> {
-        self.0.keys().copied().collect()
+        self.people.keys().copied().collect()
     }
 
     pub(crate) fn name_from_id(&self, id: usize) -> Option<String> {
-        Some(self.0.get(&id)?.to_string())
+        Some(self.people.get(&id)?.to_string())
     }
 }
 
@@ -77,17 +108,22 @@ impl People {
 mod test {
     use super::*;
 
+    // we'll add our evenizer, but keep the length the same as the original data
     #[test]
     fn not_even() {
         let csv = "1,Foo".as_bytes();
         let r = People::from_csv(csv);
-        assert!(matches!(r, Err(BuddyError::NotEven)));
+        assert!(r.is_ok());
+        let r = r.unwrap();
+        assert_eq!(r.len(), 1);
+        assert!(r.has_evenizer());
     }
     #[test]
     fn good() {
         let csv = "1,Foo\n2,Bar".as_bytes();
         let r = People::from_csv(csv);
         assert!(r.is_ok());
+        assert_eq!(r.unwrap().len(), 2);
     }
     #[test]
     fn id_not_number() {
