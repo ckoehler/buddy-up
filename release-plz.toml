@@ -25,3 +25,11 @@ publish_allow_dirty = false
 
 # disable running `cargo-semver-checks`
 semver_check = false
+
+[[package]]
+name = "buddy-up"
+changelog_path = "CHANGELOG.md"
+
+[[package]]
+name = "buddy-up-lib"
+changelog_path = "CHANGELOG.md"
