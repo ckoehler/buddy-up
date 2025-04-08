@@ -93,3 +93,86 @@ fn initialize_logging(level: tracing::Level) {
         .with_ansi(true)
         .init();
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use assert_fs::prelude::*;
+    use tempfile::TempDir;
+
+    #[test]
+    fn test_cli_parsing() {
+        let cli =
+            Cli::try_parse_from(["app", "pair", "-i", "people.csv", "-o", "output_dir"]).unwrap();
+
+        match cli.command {
+            Commands::Pair { input, output_dir } => {
+                assert_eq!(input, PathBuf::from("people.csv"));
+                assert_eq!(output_dir, PathBuf::from("output_dir"));
+            }
+        }
+
+        assert_eq!(cli.verbose, 0);
+    }
+
+    #[test]
+    fn test_cli_verbose_flags() {
+        let cli =
+            Cli::try_parse_from(["app", "-v", "pair", "-i", "people.csv", "-o", "output_dir"])
+                .unwrap();
+        assert_eq!(cli.verbose, 1);
+
+        let cli =
+            Cli::try_parse_from(["app", "-vv", "pair", "-i", "people.csv", "-o", "output_dir"])
+                .unwrap();
+        assert_eq!(cli.verbose, 2);
+    }
+
+    #[test]
+    fn test_pair_function() -> Result<()> {
+        // Set up temporary directory
+        let temp_dir = TempDir::new()?;
+        let history_dir_path = temp_dir.path();
+
+        // Create a temporary input file with test data
+        let input_file = assert_fs::NamedTempFile::new("people.csv")?;
+        input_file.write_str("1,Alice\n2,Bob\n3,Charlie\n4,David\n")?;
+
+        // Run the pair function
+        pair(input_file.path(), history_dir_path)?;
+
+        // Verify a history file was created in the output directory
+        let files = std::fs::read_dir(history_dir_path)?
+            .filter_map(Result::ok)
+            .collect::<Vec<_>>();
+
+        assert!(!files.is_empty(), "Expected history files to be created");
+
+        Ok(())
+    }
+
+    #[test]
+    fn test_initialize_logging() {
+        // Simply verify it doesn't panic
+        initialize_logging(tracing::Level::INFO);
+        // No assertions needed - just confirming it runs without error
+    }
+
+    #[test]
+    fn test_pair_with_nonexistent_input() {
+        let temp_dir = TempDir::new().unwrap();
+        let result = pair(Path::new("/nonexistent/file.csv"), temp_dir.path());
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_pair_with_invalid_csv() -> Result<()> {
+        let temp_dir = TempDir::new()?;
+        let input_file = assert_fs::NamedTempFile::new("invalid.csv")?;
+        input_file.write_str("invalid csv content")?;
+
+        let result = pair(input_file.path(), temp_dir.path());
+        assert!(result.is_err());
+
+        Ok(())
+    }
+}
