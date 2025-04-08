@@ -1,12 +1,12 @@
 [package]
 name = "buddy-up-lib"
 description = "The brains behind the buddy-up crate."
-version = "0.2.0"
+version.workspace = true
 authors.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-publish = true
+publish = false
 
 [dependencies]
 thiserror.workspace = true

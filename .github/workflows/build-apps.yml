@@ -1,0 +1,157 @@
+name: Build Apps
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  CARGO_INCREMENTAL: 0
+  CARGO_PROFILE_DEV_DEBUG: 0
+
+jobs:
+  build-cli:
+    name: Build CLI
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            ext: ""
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            ext: .exe
+          - os: macos-latest  
+            target: aarch64-apple-darwin
+            ext: ""
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: cli-${{ matrix.target }}
+          
+      - name: Build CLI
+        run: cargo build --package buddy-up --release --target ${{ matrix.target }}
+        
+      - name: Prepare CLI artifact
+        shell: bash
+        run: |
+          mkdir -p artifacts/cli
+          # CLI binary is named "buddy" (from [[bin]] section)
+          cp target/${{ matrix.target }}/release/buddy${{ matrix.ext }} artifacts/cli/buddy-${{ matrix.target }}${{ matrix.ext }}
+          
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cli-${{ matrix.target }}
+          path: artifacts/cli/
+
+  build-gui:
+    name: Build GUI  
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+          - os: macos-latest
+            target: aarch64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+          
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: gui-${{ matrix.target }}
+          
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install Dioxus CLI
+        run: cargo binstall dioxus-cli --force
+        
+      - name: Build GUI (Windows)
+        if: matrix.os == 'windows-latest'
+        working-directory: crates/gui
+        run: dx bundle --release --platform desktop
+        
+      - name: Build GUI (macOS)
+        if: matrix.os == 'macos-latest'
+        working-directory: crates/gui  
+        run: dx bundle --release --platform desktop
+        
+      - name: Prepare GUI artifacts (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          mkdir -p artifacts/gui
+          # Find Windows bundle artifacts in target/dx/buddy-up-gui/bundle/
+          find target/dx/buddy-up-gui/bundle -name "*.exe" -o -name "*.msi" | while read file; do
+            cp "$file" "artifacts/gui/$(basename "$file" | sed "s/\(.*\)\(\.[^.]*\)$/\1-${{ matrix.target }}\2/")"
+          done
+          
+      - name: Prepare GUI artifacts (macOS)  
+        if: matrix.os == 'macos-latest'
+        shell: bash
+        run: |
+          mkdir -p artifacts/gui
+          # Copy macOS app bundle from target/dx/buddy-up-gui/bundle/macos/bundle/macos/
+          if [ -d "target/dx/buddy-up-gui/bundle/macos/bundle/macos/BuddyUpGui.app" ]; then
+            cp -r "target/dx/buddy-up-gui/bundle/macos/bundle/macos/BuddyUpGui.app" "artifacts/gui/BuddyUpGui-${{ matrix.target }}.app"
+          fi
+          # Copy DMG if it exists from target/dx/buddy-up-gui/bundle/macos/
+          find target/dx/buddy-up-gui/bundle/macos -name "*.dmg" | while read file; do
+            cp "$file" "artifacts/gui/$(basename "$file" | sed "s/\(.*\)\(\.[^.]*\)$/\1-${{ matrix.target }}\2/")"
+          done
+          
+      - name: Upload GUI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gui-${{ matrix.target }}
+          path: artifacts/gui/
+
+  create-release:
+    name: Create Release
+    needs: [build-cli, build-gui]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+          
+      - name: Display artifacts
+        run: find artifacts -type f -ls
+        
+      - name: Create Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create release with all artifacts
+          gh release create ${{ github.ref_name }} \
+            --title "Release ${{ github.ref_name }}" \
+            --generate-notes \
+            artifacts/**/* 
