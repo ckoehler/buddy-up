@@ -46,6 +46,22 @@ targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-
 pr-run-mode = "plan"
 # Whether to install an updater program
 install-updater = false
+# Include extra files in all releases
+include = ["README.md", "CHANGELOG.md", "LICENSE*"]
+bin = ["buddy-up", "buddy-up-gui"]
+
+[workspace.metadata.dist.dependencies.gui]
+# Platform-specific dependencies for GUI builds
+apt = [
+  "libwebkit2gtk-4.1-dev",
+  "libgtk-3-dev", 
+  "libxdo-dev"
+]
+
+# Optional: Configure the release GitHub body
+[workspace.metadata.dist.github-custom-runners]
+aarch64-apple-darwin = "macos-latest"
+x86_64-apple-darwin = "macos-13"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
