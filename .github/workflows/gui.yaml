@@ -21,8 +21,8 @@ permissions:
   contents: write
 
 jobs:
-  build-desktop:
-    name: Build Dioxus Desktop App
+  build:
+    name: Build GUI
     strategy:
       fail-fast: false
       matrix:
@@ -52,7 +52,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          key: ${{ matrix.target }}
+          key: gui-${{ matrix.target }}
 
       - name: Install system dependencies (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -60,7 +60,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev
 
-      - name: Build Dioxus app
+      - name: Build GUI only
         run: cargo build --release --target ${{ matrix.target }} --package gui
 
       - name: Create app bundle (macOS)
@@ -123,7 +123,7 @@ jobs:
 
   create-release:
     name: Create Release
-    needs: build-desktop
+    needs: build
     runs-on: ubuntu-latest
     # Run on tags OR manual workflow dispatch with test release option
     if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && inputs.create_test_release)
