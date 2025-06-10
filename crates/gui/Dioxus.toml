@@ -23,4 +23,20 @@ script = []
 [bundle]
 identifier = "io.alltohim"
 publisher = "zerodeviation"
+icon = [
+   "icons/icon_32x32.png",
+   "icons/icon_128x128.png",
+   "icons/icon_128x128@2x.png",
+   "icons/icon.icns",
+   "icons/icon.ico"
+]
+category = "Utility"
+short_description = "Pair up people."
+long_description = "Pair up people."
+
+[bundle.windows]
+icon_path = ".\\icons\\icon.ico"
+tsp = true
+webview_install_mode = { OfflineInstaller = { silent = false } }
+allow_downgrades = true
 

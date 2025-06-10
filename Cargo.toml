@@ -8,10 +8,10 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ckoehler/buddy-up"
 readme = "README.md"
-version = "0.2.0-beta.5"
+version = "0.2.0-7"
 
 [workspace.dependencies]
-buddy-up-lib = { version = "0.2.0", path = "crates/lib"}
+buddy-up-lib = { path = "crates/lib"}
 anyhow = "1.0.98"
 chrono = "0.4.41"
 clap = { version = "4.5.39", features = ["derive"] }
@@ -32,37 +32,6 @@ tracing-subscriber = { version = "0.3.19", features = ["env-filter", "ansi"] }
 # pedantic = { level = "deny", priority = -1 }
 cast_precision_loss = "allow"
 similar_names = "allow"
-
-# Config for 'cargo dist'
-[workspace.metadata.dist]
-# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
-cargo-dist-version = "0.12.0"
-# CI backends to support
-ci = ["github"]
-# The installers to generate for each app
-installers = ["shell", "powershell"]
-# Target platforms to build apps for (Rust target-triple syntax)
-targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-unknown-linux-musl", "x86_64-pc-windows-msvc"]
-# Publish jobs to run in CI
-pr-run-mode = "plan"
-# Whether to install an updater program
-install-updater = false
-# Extra static files to include in each App (path relative to this Cargo.toml's dir)
-include = ["README.md", "CHANGELOG.md", "LICENSE*"]
-bin = ["buddy-up", "buddy-up-gui"]
-
-[workspace.metadata.dist.dependencies.gui]
-# Platform-specific dependencies for GUI builds
-apt = [
-  "libwebkit2gtk-4.1-dev",
-  "libgtk-3-dev", 
-  "libxdo-dev"
-]
-
-# Optional: Configure the release GitHub body
-[workspace.metadata.dist.github-custom-runners]
-aarch64-apple-darwin = "macos-latest"
-x86_64-apple-darwin = "macos-13"
 
 # The profile that 'cargo dist' will build with
 [profile.dist]
