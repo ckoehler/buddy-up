@@ -33,7 +33,7 @@ pub fn save_history(pairs: &Pairs, dir: &str) -> Result<(), BuddyError> {
 ///
 /// If one pair includes the Evenizer with id usize::MAX, don't include the real user paired with
 /// the Evenizer, and instead print a note below the table with that user not being paired.
-pub fn print_table(pairs: Pairs) {
+pub fn print_table(pairs: Pairs) -> String {
     // now print the pairs
     let mut table = Table::new();
 
@@ -49,8 +49,9 @@ pub fn print_table(pairs: Pairs) {
             table.add_row(vec![pair.0.clone(), pair.1.clone()]);
         }
     }
-    println!("{table}");
+    let mut table = table.to_string();
     if let Some(unpaired) = unpaired {
-        println!("Not paired: {unpaired}");
+        table.push_str(&format!("Not paired: {unpaired}"));
     }
+    table
 }

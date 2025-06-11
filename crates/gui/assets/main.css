@@ -1,0 +1,21 @@
+/* App-wide styling */
+body {
+    background-color: #6f7790;
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 20px;
+}
+
+
+p {
+  margin: 5px 0;
+}
+
+textarea {
+  width: auto;
+  height: auto;
+  font-size: 1.1em;
+  font-family: monospace;
+}
+
+
