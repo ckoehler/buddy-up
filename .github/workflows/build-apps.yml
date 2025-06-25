@@ -115,10 +115,6 @@ jobs:
         shell: bash
         run: |
           mkdir -p artifacts/gui
-          # Copy macOS app bundle from target/dx/buddy-up-gui/bundle/macos/bundle/macos/
-          if [ -d "target/dx/buddy-up-gui/bundle/macos/bundle/macos/BuddyUpGui.app" ]; then
-            cp -r "target/dx/buddy-up-gui/bundle/macos/bundle/macos/BuddyUpGui.app" "artifacts/gui/BuddyUpGui-${{ matrix.target }}.app"
-          fi
           # Copy DMG if it exists from target/dx/buddy-up-gui/bundle/macos/
           find target/dx/buddy-up-gui/bundle/macos -name "*.dmg" | while read file; do
             cp "$file" "artifacts/gui/$(basename "$file" | sed "s/\(.*\)\(\.[^.]*\)$/\1-${{ matrix.target }}\2/")"
