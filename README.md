@@ -1,4 +1,4 @@
-# Buddy-Up 🎉🥳  [![Continuous Integration](https://github.com/ckoehler/buddy-up/actions/workflows/ci.yml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/ci.yml) [![Continuous Deployment](https://github.com/ckoehler/buddy-up/actions/workflows/cd.yaml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/cd.yaml) [![Release](https://github.com/ckoehler/buddy-up/actions/workflows/release.yml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/release.yml)
+# Buddy-Up 🎉🥳  [![Continuous Integration](https://github.com/ckoehler/buddy-up/actions/workflows/ci.yml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/ci.yml) [![Build Apps](https://github.com/ckoehler/buddy-up/actions/workflows/build-apps.yml/badge.svg)](https://github.com/ckoehler/buddy-up/actions/workflows/build-apps.yml)
 
 Buddy up a changing group of people into unique pairs over time.
 
@@ -91,7 +91,7 @@ That gets big really fast. For $n=10$, $k \approx 1000$; for $n=20$, $k \approx 
 
 Then I needed a way to save pairs as history. Fortunately, there are a lot fewer unique pairs. Arranging pairs in a $n x n$ matrix, we can throw out the
 diagonal (because no one will be paired up with just themselves), and half of the rest, because it's symmetric along the diagonal (because pairs don't
-have an internal order), so that we end up with $p$ unique pairs:
+have an internal order), so that we end up with $p$ unique pairs, where $p$ is:
 
 $$p = \frac{n^2 - n}{2}$$
 
