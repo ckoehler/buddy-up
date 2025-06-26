@@ -77,7 +77,7 @@ pub fn Input(
                     },
                     "Pick History Folder"
                 }
-            if !history.read().is_empty() {
+            if !out_dir.read().is_empty() {
                 p { "Chosen History Directory: { out_dir.read() }" }
                 p { "Found { history.read().len() } pairs in the history." }
             }
@@ -102,7 +102,7 @@ pub fn Results(
                 button {
                     id: "generate",
                     onclick: move |_ev| {
-                        if people.is_empty() || history.read().is_empty() {
+                        if people.is_empty() || out_dir.read().is_empty() {
                             return;
                         }
                         let out = pair(people.clone(), &history.read());
