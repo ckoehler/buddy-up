@@ -51,7 +51,7 @@ pub fn print_table(pairs: Pairs) -> String {
     }
     let mut table = table.to_string();
     if let Some(unpaired) = unpaired {
-        table.push_str(&format!("Not paired: {unpaired}"));
+        table.push_str(&format!("\nNot paired: {unpaired}"));
     }
     table
 }
