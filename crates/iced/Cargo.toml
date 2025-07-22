@@ -1,0 +1,17 @@
+[package]
+name = "buddy-up-iced"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+version.workspace = true
+
+[dependencies]
+iced = "0.13.1"
+buddy-up-lib.workspace = true
+rfd.workspace = true
+arboard = "3.4.1"
+
+[lints]
+workspace = true
