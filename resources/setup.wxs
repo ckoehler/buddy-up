@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="windows-1252"?>
+
+<?if $(sys.BUILDARCH) = x64 or $(sys.BUILDARCH) = arm64 ?>
+    <?define PlatformProgramFilesFolder = "ProgramFiles64Folder" ?>
+<?else ?>
+    <?define PlatformProgramFilesFolder = "ProgramFilesFolder" ?>
+<?endif ?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product
+        Id="*"
+        Name="BuddyUp"
+        UpgradeCode="A1B2C3D4-E5F6-47A8-9B0C-123456789ABC"
+        Manufacturer="Christoph Koehler"
+        Language="1033"
+        Codepage="1252"
+        Version="$(var.Version)"
+    >
+        <Package Id="*"
+            Keywords="Installer"
+            Description="BuddyUp: Pairing up groups"
+            Manufacturer="Christoph Koehler"
+            InstallerVersion="450"
+            Languages="1033"
+            Compressed="yes"
+            InstallScope="perMachine"
+            SummaryCodepage="1252"
+        />
+
+        <MajorUpgrade
+            Schedule="afterInstallInitialize"
+            DowngradeErrorMessage="A newer version of [ProductName] is already installed. Setup will now exit."
+        />
+
+        <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" DiskPrompt="CD-ROM #1"/>
+        <Property Id="DiskPrompt" Value="BuddyUp Installation"/>
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="$(var.PlatformProgramFilesFolder)" Name="PFiles">
+                <Directory Id="APPLICATIONFOLDER" Name="BuddyUp">
+
+                    <Component Id="License" Guid="B36E8284-89A2-4E79-BD7F-3E09EA2C4713">
+                        <File Id="LicenseFile" Name="License.txt" DiskId="1" Source="resources\LICENSE" KeyPath="yes"/>
+                    </Component>
+
+                    <Component Id="binary0" Guid="68F0AFE1-A350-4E13-9333-DA54AA435B14">
+                        <File
+                            Id="exe0"
+                            Name="buddy-up-iced.exe"
+                            DiskId="1"
+                            Source="target\buddy-up-iced.exe"
+                            KeyPath="yes"
+                        />
+                    </Component>
+                    <Component Id="Path" Guid="F235E4DE-745C-4B50-BA17-593BEE5641D3" KeyPath="yes">
+                        <Environment
+                            Id="PATH"
+                            Name="PATH"
+                            Value="[APPLICATIONFOLDER]"
+                            Permanent="no"
+                            Part="last"
+                            Action="set"
+                            System="yes"
+                        />
+                    </Component>
+                </Directory>
+            </Directory>
+
+            <Directory Id="ProgramMenuFolder">
+                <Directory Id="ApplicationProgramsFolder" Name="BuddyUp">
+                    <Component Id="StartMenuShortcut" Guid="5E665F8C-85A8-4DB1-81FD-9F6BDFA02708">
+                        <Shortcut
+                            Id="ApplicationStartMenuShortcut"
+                            Name="BuddyUp"
+                            Description="BuddyUp: Pairing people"
+                            Target="[APPLICATIONFOLDER]buddy-up-iced.exe"
+                            WorkingDirectory="APPLICATIONFOLDER"
+                        />
+                        <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
+                        <RegistryValue
+                            Root="HKCU"
+                            Key="Software\ZeroDeviation\BuddyUp\StartMenuShortcut"
+                            Name="installed"
+                            Type="integer"
+                            Value="1"
+                            KeyPath="yes"
+                        />
+                    </Component>
+                </Directory>
+            </Directory>
+
+            <Directory Id="DesktopFolder" Name="Desktop">
+                <Component Id="DesktopShortcut" Guid="C1635238-2FD3-4C65-9104-333B5BD47BD1">
+                    <Shortcut
+                        Id="ApplicationDesktopShortcut"
+                        Name="BuddyUp"
+                        Description="BuddyUp: Pairing and history management application"
+                        Target="[APPLICATIONFOLDER]buddy-up-iced.exe"
+                        WorkingDirectory="APPLICATIONFOLDER"
+                    />
+                    <RemoveFolder Id="DesktopFolder" On="uninstall"/>
+                    <RegistryValue
+                        Root="HKCU"
+                        Key="Software\ZeroDeviation\BuddyUp\DesktopShortcut"
+                        Name="installed"
+                        Type="integer"
+                        Value="1"
+                        KeyPath="yes"
+                    />
+                </Component>
+            </Directory>
+        </Directory>
+
+        <Feature
+            Id="Binaries"
+            Title="Application"
+            Description="Installs all binaries and the license."
+            Level="1"
+            ConfigurableDirectory="APPLICATIONFOLDER"
+            AllowAdvertise="no"
+            Display="expand"
+            Absent="disallow"
+        >
+            <ComponentRef Id="License"/>
+            <ComponentRef Id="binary0"/>
+
+            <Feature
+                Id="Environment"
+                Title="PATH Environment Variable"
+                Description="Add the install location of the [ProductName] executable to the PATH system environment variable. This allows the [ProductName] executable to be called from any location."
+                Level="1"
+                Absent="allow"
+            >
+                <ComponentRef Id="Path"/>
+            </Feature>
+
+            <Feature
+                Id="StartMenu"
+                Title="Start Menu Shortcut"
+                Description="Add [ProductName] shortcut in the Start Menu for quick search."
+                Level="1"
+                Absent="allow"
+            >
+                <ComponentRef Id="StartMenuShortcut"/>
+            </Feature>
+
+            <Feature
+                Id="Desktop"
+                Title="Desktop Shortcut"
+                Description="Add the [ProductName] shortcut to the Desktop for quick access."
+                Level="1"
+                Absent="allow"
+            >
+                <ComponentRef Id="DesktopShortcut"/>
+            </Feature>
+        </Feature>
+
+        <SetProperty Id="ARPINSTALLLOCATION" Value="[APPLICATIONFOLDER]" After="CostFinalize"/>
+
+        <Icon Id="ProductICO" SourceFile="resources\icon.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="ProductICO"/>
+
+        <Property Id="ARPHELPLINK" Value="https://github.com/ckoehler/buddy-up"/>
+
+        <UI>
+            <UIRef Id="WixUI_FeatureTree"/>
+        </UI>
+
+        <WixVariable Id="WixUILicenseRtf" Value="resources\EULA.rtf"/>
+    </Product>
+</Wix>
