@@ -16,141 +16,196 @@ env:
   CARGO_PROFILE_DEV_DEBUG: 0
 
 jobs:
-  build-cli:
-    name: Build CLI
+  build:
+    runs-on: ${{ matrix.os }}-latest
     strategy:
+      fail-fast: true
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu
+            arch: amd64
             target: x86_64-unknown-linux-gnu
-            ext: ""
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            ext: .exe
-          - os: macos-latest  
+          - os: macos
+            arch: arm64
             target: aarch64-apple-darwin
-            ext: ""
-    runs-on: ${{ matrix.os }}
-    
+          - os: windows
+            arch: amd64
+            target: x86_64-pc-windows-msvc
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        
+
+      - name: Install system dependencies
+        if: matrix.os == 'ubuntu'
+        run: sudo apt-get update -y && sudo apt-get install -y libglib2.0-dev libgtk-3-dev
+
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
-          
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: cli-${{ matrix.target }}
-          
-      - name: Build CLI
-        run: cargo build --package buddy-up --release --target ${{ matrix.target }}
-        
-      - name: Prepare CLI artifact
-        shell: bash
-        run: |
-          mkdir -p artifacts/cli
-          # CLI binary is named "buddy" (from [[bin]] section)
-          cp target/${{ matrix.target }}/release/buddy${{ matrix.ext }} artifacts/cli/buddy-${{ matrix.target }}${{ matrix.ext }}
-          
-      - name: Upload CLI artifact
+
+      - name: Install Windows targets
+        if: matrix.os == 'windows'
+        run: rustup target add ${{ matrix.target }}
+
+      - name: Install Cross
+        if: matrix.os == 'ubuntu'
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build binary (Linux)
+        if: matrix.os == 'ubuntu'
+        run: cross build --release --target ${{ matrix.target }}
+
+      - name: Build binary (macOS/Windows)
+        if: matrix.os == 'macos' || matrix.os == 'windows'
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: cli-${{ matrix.target }}
-          path: artifacts/cli/
+          name: build-${{ matrix.os }}-${{ matrix.target }}
+          path: |
+            target/${{ matrix.target }}/release/buddy-up-iced
+            target/${{ matrix.target }}/release/buddy-up-iced.exe
+          if-no-files-found: error
 
-  build-gui:
-    name: Build GUI  
-    strategy:
-      matrix:
-        include:
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-          - os: macos-latest
-            target: aarch64-apple-darwin
-    runs-on: ${{ matrix.os }}
-    
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
-          
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: gui-${{ matrix.target }}
-          
-      - uses: cargo-bins/cargo-binstall@main
-
-      - name: Install Dioxus CLI
-        run: cargo binstall dioxus-cli --force
-        
-      - name: Build GUI (Windows)
-        if: matrix.os == 'windows-latest'
-        working-directory: crates/gui
-        run: dx bundle --release --platform desktop
-        
-      - name: Build GUI (macOS)
-        if: matrix.os == 'macos-latest'
-        working-directory: crates/gui  
-        run: dx bundle --release --platform desktop
-        
-      - name: Prepare GUI artifacts (Windows)
-        if: matrix.os == 'windows-latest'
-        shell: bash
-        run: |
-          mkdir -p artifacts/gui
-          # Find Windows bundle artifacts in target/dx/buddy-up-gui/bundle/
-          find target/dx/buddy-up-gui/bundle -name "*.exe" -o -name "*.msi" | while read file; do
-            cp "$file" "artifacts/gui/$(basename "$file" | sed "s/\(.*\)\(\.[^.]*\)$/\1-${{ matrix.target }}\2/")"
-          done
-          
-      - name: Prepare GUI artifacts (macOS)  
-        if: matrix.os == 'macos-latest'
-        shell: bash
-        run: |
-          mkdir -p artifacts/gui
-          # Copy DMG if it exists from target/dx/buddy-up-gui/bundle/macos/
-          find target/dx/buddy-up-gui/bundle/macos -name "*.dmg" | while read file; do
-            cp "$file" "artifacts/gui/$(basename "$file" | sed "s/\(.*\)\(\.[^.]*\)$/\1-${{ matrix.target }}\2/")"
-          done
-          
-      - name: Upload GUI artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: gui-${{ matrix.target }}
-          path: artifacts/gui/
-
-  create-release:
-    name: Create Release
-    needs: [build-cli, build-gui]
+  release:
+    name: Create GitHub Release
     runs-on: ubuntu-latest
+    needs: [dmg, msi]
     if: startsWith(github.ref, 'refs/tags/v')
-    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: artifacts
-          merge-multiple: true
-          
-      - name: Display artifacts
-        run: find artifacts -type f -ls
-        
-      - name: Create Release
+          path: release-artifacts
+
+      - name: List downloaded artifacts
+        run: ls -al release-artifacts
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            release-artifacts/**/*.msi
+            release-artifacts/**/*.dmg
+          draft: false
+          prerelease: false
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  #
+
+  dmg:
+    runs-on: macos-latest
+    needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: AppleSilicon
+            target: aarch64-apple-darwin
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install packaging tools
         run: |
-          # Create release with all artifacts
-          gh release create ${{ github.ref_name }} \
-            --title "Release ${{ github.ref_name }}" \
-            --generate-notes \
-            artifacts/* 
+          cargo install toml-cli
+          brew install create-dmg
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-macos-${{ matrix.target }}
+          path: target/
+
+      - name: Package for macOS
+        shell: bash
+        run: |
+          VERSION=$(toml get Cargo.toml workspace.package.version --raw)
+          echo $VERSION
+          sed -i'.bak' -e "s/0\.0\.0/${VERSION}/g" -e "s/fffffff/${GITHUB_SHA:0:7}/g" resources/Info.plist
+          mkdir artifacts
+          mkdir -p target/release/bundle/osx/BuddyUp.app/Contents/{MacOS,Resources}
+          cp resources/Info.plist \
+            target/release/bundle/osx/BuddyUp.app/Contents/
+          cp crates/gui/icons/icon.icns \
+            target/release/bundle/osx/BuddyUp.app/Contents/Resources/
+          ls -la 
+          ls -la target
+          chmod +x target/buddy-up-iced
+          cp target/buddy-up-iced target/release/bundle/osx/BuddyUp.app/Contents/MacOS/
+          create-dmg \
+            --volname "BuddyUp Installer" \
+            --window-pos 200 120 \
+            --window-size 900 450 \
+            --icon-size 100 \
+            --app-drop-link 620 240 \
+            --icon "BuddyUp.app" 300 240 \
+            --hide-extension "BuddyUp.app" \
+            "artifacts/BuddyUp_macOS_${{ matrix.arch }}.dmg" \
+            "target/release/bundle/osx/"
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dmg-${{ matrix.arch }}
+          path: artifacts/
+          if-no-files-found: error
+
+  msi:
+    runs-on: windows-latest
+    needs: build
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: 64-bit
+            target: x86_64-pc-windows-msvc
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        shell: powershell
+        run: |
+          Write-Host "::group::WiX Toolset"
+          Invoke-WebRequest `
+            -Uri "https://github.com/wixtoolset/wix3/releases/download/wix3112rtm/wix311-binaries.zip" `
+            -OutFile "$env:TEMP\wix-binaries.zip" -Verbose
+          Expand-Archive -LiteralPath "$env:TEMP\wix-binaries.zip" -DestinationPath "$env:TEMP\wix" -Verbose
+          Set-Item -Path env:Path -Value "$env:Path;$env:TEMP\wix"
+          Write-Host "::endgroup::"
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install packaging tools
+        run: cargo install cargo-wix
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-windows-${{ matrix.target }}
+          path: target/
+
+      - name: Package for Microsoft Windows
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path artifacts
+          cargo wix --no-build --name buddy-up --package buddy-up-iced --nocapture --target ${{ matrix.target }}
+          Move-Item -Path target\wix\buddy-up*.msi -Destination .\artifacts\BuddyUp_Windows_${{ matrix.arch }}.msi
+
+      - name: Upload package artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: msi-${{ matrix.arch }}
+          path: artifacts/
+          if-no-files-found: error

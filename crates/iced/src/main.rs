@@ -90,11 +90,11 @@ impl App {
                                     format!("✓ Loaded {} people", self.people.len());
                             }
                             Err(e) => {
-                                self.people_status = format!("✗ Error loading file: {}", e);
+                                self.people_status = format!("✗ Error loading file: {e}");
                             }
                         },
                         Err(e) => {
-                            self.people_status = format!("✗ Error opening file: {}", e);
+                            self.people_status = format!("✗ Error opening file: {e}");
                         }
                     }
                 }
@@ -110,7 +110,7 @@ impl App {
                                 format!("✓ Found {} pairs in history", self.history.len());
                         }
                         Err(e) => {
-                            self.history_status = format!("✗ Error loading history: {}", e);
+                            self.history_status = format!("✗ Error loading history: {e}");
                         }
                     }
                 }
@@ -125,11 +125,11 @@ impl App {
                                     format!("✓ Loaded {} people", self.people.len());
                             }
                             Err(e) => {
-                                self.people_status = format!("✗ Error loading file: {}", e);
+                                self.people_status = format!("✗ Error loading file: {e}");
                             }
                         },
                         Err(e) => {
-                            self.people_status = format!("✗ Error opening file: {}", e);
+                            self.people_status = format!("✗ Error opening file: {e}");
                         }
                     }
                 }
@@ -149,8 +149,7 @@ impl App {
                                         format!("✓ Found {} pairs in history", self.history.len());
                                 }
                                 Err(e) => {
-                                    self.history_status =
-                                        format!("✗ Error reloading history: {}", e);
+                                    self.history_status = format!("✗ Error reloading history: {e}");
                                 }
                             }
 
