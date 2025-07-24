@@ -42,7 +42,7 @@ lto = "thin"
 # Release all crates together with the same version
 shared-version = true
 # Run git-cliff to update changelog before release
-pre-release-hook = ["git-cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
+pre-release-hook = ["git", "cliff", "--workdir", "../../", "-o", "../../CHANGELOG.md", "--tag", "{{version}}" ]
 # Tag format
 tag-name = "v{{version}}"
 # Push everything
