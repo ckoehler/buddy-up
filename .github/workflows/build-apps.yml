@@ -134,7 +134,7 @@ jobs:
           mkdir -p target/release/bundle/osx/BuddyUp.app/Contents/{MacOS,Resources}
           cp resources/Info.plist \
             target/release/bundle/osx/BuddyUp.app/Contents/
-          cp crates/gui/icons/icon.icns \
+          cp resources/icon.icns \
             target/release/bundle/osx/BuddyUp.app/Contents/Resources/
           ls -la 
           ls -la target
