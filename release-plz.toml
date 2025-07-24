@@ -1,0 +1,18 @@
+[workspace]
+# Don't publish to crates.io
+publish = false
+# Only create PRs, don't auto-release
+release = false
+# Create PRs with version bumps
+pr_labels = ["release"]
+# Update changelog
+changelog_update = true
+
+[[package]]
+name = "buddy-up"
+
+[[package]]
+name = "buddy-up-iced"
+
+[[package]]
+name = "buddy-up-lib"
