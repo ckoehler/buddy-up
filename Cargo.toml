@@ -8,6 +8,7 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ckoehler/buddy-up"
 readme = "README.md"
+version = "0.3.1"
 publish = false
 
 [workspace.dependencies]
@@ -36,3 +37,15 @@ similar_names = "allow"
 [profile.dist]
 inherits = "release"
 lto = "thin"
+
+[workspace.metadata.release]
+# Release all crates together with the same version
+shared-version = true
+# Run git-cliff to update changelog before release
+pre-release-hook = ["git-cliff", "-o", "CHANGELOG.md", "--tag", "{{version}}"]
+# Tag format
+tag-name = "v{{version}}"
+# Push everything
+push = true
+# Don't publish to crates.io automatically (since you have publish = false)
+publish = false
