@@ -7,6 +7,10 @@ Buddy up a changing group of people into unique pairs over time.
 - Head to the [Releases](https://github.com/ckoehler/buddy-up/releases/latest) and download the binary for your platform.
 - Install with Cargo: `cargo install --locked buddy-up`
 
+### Mac OS
+
+Install, then run `xattr -r -d com.apple.quarantine /Applications/BuddyUp.app` in a terminal.
+
 ## How to Use
 
 `buddy --help` has good info. 
