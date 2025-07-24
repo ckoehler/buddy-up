@@ -1,0 +1,21 @@
+{
+  "release-type": "rust",
+  "packages": {
+    "crates/cli": {
+      "package-name": "buddy-up"
+    },
+    "crates/lib": {
+      "package-name": "buddy-up-lib"
+    },
+    "crates/iced": {
+      "package-name": "buddy-up-iced"
+    }
+  },
+  "changelog-sections": [
+    {"type": "feat", "section": "🚀 Features"},
+    {"type": "fix", "section": "🐛 Bug Fixes"},
+    {"type": "refactor", "section": "🚜 Refactor"},
+    {"type": "docs", "section": "📚 Documentation"},
+    {"type": "chore", "section": "⚙️ Miscellaneous Tasks"}
+  ]
+}
