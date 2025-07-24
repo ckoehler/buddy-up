@@ -6,6 +6,7 @@ license.workspace = true
 repository.workspace = true
 readme.workspace = true
 version.workspace = true
+publish.workspace = true
 
 [dependencies]
 iced = "0.13.1"
@@ -18,4 +19,3 @@ workspace = true
 
 [package.metadata.wix]
 include = ["resources\\setup.wxs"]
-
