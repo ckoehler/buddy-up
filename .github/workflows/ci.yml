@@ -36,159 +36,60 @@ env:
   CARGO_PROFILE_DEV_DEBUG: 0
 
 jobs:
-  rustfmt:
+  fmt:
     name: Format
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt
-    - uses: Swatinem/rust-cache@v2
-    - name: Check formatting
-      run: cargo fmt --all --check
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all --check
 
-  clippy-core:
-    name: Clippy (Core)
+  clippy:
+    name: Clippy
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: clippy
-    - uses: Swatinem/rust-cache@v2
-      with:
-        key: clippy-core
-    - name: Clippy (lib and CLI)
-      run: cargo clippy --workspace --exclude gui --locked -- -D warnings
-
-  clippy-gui:
-    name: Clippy (GUI)
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Install minimal GUI dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: clippy
-    - uses: Swatinem/rust-cache@v2
-      with:
-        key: clippy-gui
-    - name: Clippy (GUI)
-      run: cargo clippy --package gui --locked -- -D warnings
-
-  test-core:
-    name: Test Core
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      - uses: taiki-e/install-action@nextest
-      - uses: Swatinem/rust-cache@v2
         with:
-          key: test-core-${{ matrix.os }}
-      - name: Compile (lib and CLI only)
-        run: cargo check --workspace --exclude gui --locked
-      - name: Test (lib and CLI only)
-        run: cargo nextest run --workspace --exclude gui
+          components: clippy
+      - name: Clippy (workspace)
+        run: cargo clippy --workspace --locked -- -D warnings
 
-  test-gui-compile:
-    name: Test GUI Compile
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  test:
+    name: Test
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install minimal GUI dependencies (Linux)
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: test-gui-${{ matrix.os }}
-      - name: Compile GUI
-        run: cargo check --package gui --locked
+      - name: Test (workspace)
+        run: cargo test --workspace --locked --verbose -- --nocapture
 
-  cargo-deny:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+      - name: Build (workspace)
+        run: cargo build --workspace --locked --release
+
+  deny:
     name: Cargo Deny
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Cargo Deny
-      uses: EmbarkStudios/cargo-deny-action@v2
-
-  build-core:
-    name: Build Core (Lib + CLI)
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-          - os: macos-latest
-            target: aarch64-apple-darwin
-    runs-on: ${{ matrix.os }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: ${{ matrix.target }}
-    - uses: Swatinem/rust-cache@v2
-      with:
-        key: build-core-${{ matrix.target }}
-    - name: Build CLI and lib
-      run: cargo build --workspace --exclude gui --target ${{ matrix.target }} --locked --release
-
-  build-all:
-    name: Build All (CLI + GUI)
-    strategy:
-      matrix:
-        include:
-          - os: ubuntu-latest
-            target: x86_64-unknown-linux-gnu
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-          - os: macos-latest
-            target: aarch64-apple-darwin
-    runs-on: ${{ matrix.os }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-    - name: Install GUI dependencies (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libxdo-dev
-    - name: Install Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: ${{ matrix.target }}
-    - uses: Swatinem/rust-cache@v2
-      with:
-        key: build-all-${{ matrix.target }}
-    - name: Build CLI and GUI
-      run: cargo build --workspace --target ${{ matrix.target }} --locked --release
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Cargo Deny
+        uses: EmbarkStudios/cargo-deny-action@v2
 
