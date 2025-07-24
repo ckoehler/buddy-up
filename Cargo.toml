@@ -9,6 +9,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/ckoehler/buddy-up"
 readme = "README.md"
 version = "0.2.0-7"
+publish = true
 
 [workspace.dependencies]
 buddy-up-lib = { path = "crates/lib"}
@@ -36,4 +37,3 @@ similar_names = "allow"
 [profile.dist]
 inherits = "release"
 lto = "thin"
-
