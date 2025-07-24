@@ -1,5 +1,4 @@
 {
-  "plugins": ["cargo-workspace"],
   "packages": {
     ".": {
       "changelog-path": "CHANGELOG.md",
@@ -8,8 +7,15 @@
       "bump-patch-for-minor-pre-major": false,
       "draft": false,
       "prerelease": false,
-      "release-as": "0.4.0"
+      "release-as": "0.4.0",
+      "include-component-in-tag": false
     }
   },
+  "plugins": [
+    {
+      "type": "cargo-workspace",
+      "merge": false
+    }
+  ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
 }
