@@ -70,26 +70,9 @@ feature-depth = 1
 # A list of advisory IDs to ignore. Note that ignored advisories will still
 # output a note when they are encountered.
 ignore = [
-    # unmaintained thru dioxus
-    "RUSTSEC-2024-0413",
-    "RUSTSEC-2024-0416",
-    "RUSTSEC-2024-0412",
-    "RUSTSEC-2024-0418",
-    "RUSTSEC-2024-0411",
-    "RUSTSEC-2024-0417",
-    "RUSTSEC-2024-0414",
-    "RUSTSEC-2024-0415",
-    "RUSTSEC-2024-0420",
-    "RUSTSEC-2024-0419",
 
     # instant
     "RUSTSEC-2024-0384",
-
-    # proc-error-macro
-    "RUSTSEC-2024-0370",
-
-    # unsound  glib
-    "RUSTSEC-2024-0429",
 
     # paste not maintained
     "RUSTSEC-2024-0436",

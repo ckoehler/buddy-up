@@ -184,7 +184,7 @@ impl App {
         Task::none()
     }
 
-    fn view(&self) -> Element<Message> {
+    fn view(&self) -> Element<'_, Message> {
         let input_section = column![
             text("People:").size(20),
             button("Pick CSV File").on_press(Message::PickInputFile),
