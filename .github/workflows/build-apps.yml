@@ -45,6 +45,11 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
       - name: Install Windows targets
         if: matrix.os == 'windows'
         run: rustup target add ${{ matrix.target }}
@@ -128,6 +133,9 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+
       - name: Install packaging tools
         run: |
           cargo install toml-cli
@@ -201,6 +209,11 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
+
+      - name: Setup Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
 
       - name: Install packaging tools
         run: cargo install cargo-wix
