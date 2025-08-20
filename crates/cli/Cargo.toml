@@ -21,7 +21,7 @@ tracing-subscriber.workspace = true
 tracing-error.workspace = true
 
 [dev-dependencies]
-tempfile = "3.2"
+tempfile = "3.21"
 assert_fs = "1.0"
 
 [[bin]]
