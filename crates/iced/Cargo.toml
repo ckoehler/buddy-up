@@ -12,7 +12,7 @@ publish.workspace = true
 iced = "0.13.1"
 buddy-up-lib.workspace = true
 rfd.workspace = true
-arboard = "3.4.1"
+arboard = "3.6.1"
 
 [lints]
 workspace = true
