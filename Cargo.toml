@@ -23,7 +23,7 @@ glob = "0.3.3"
 rfd = "0.15.4"
 serde = { version = "1.0.227", features = ["derive"] }
 serde_json = "1.0.145"
-thiserror = "2.0.16"
+thiserror = "2.0.17"
 tracing = { version = "0.1.41", features = ["log"] }
 tracing-error = "0.2.1"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter", "ansi"] }
