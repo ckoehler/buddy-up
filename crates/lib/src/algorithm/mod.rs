@@ -1,7 +1,7 @@
 pub mod history;
 use crate::People;
 use crate::Person;
-use genetic_algorithm::{chromosome::GenesOwner, strategy::evolve::prelude::*};
+use genetic_algorithm::strategy::evolve::prelude::*;
 use history::History;
 use serde::Deserialize;
 use serde::Serialize;
@@ -38,8 +38,8 @@ pub fn pair(people: People, last: &History) -> Pairs {
         //.with_par_fitness(true)
         .with_replace_on_equal_fitness(true)
         .with_mutate(MutateSingleGene::new(0.2))
-        .with_crossover(CrossoverClone::new())
-        .with_select(SelectElite::new(0.9))
+        .with_crossover(CrossoverClone::new(0.9))
+        .with_select(SelectElite::new(0.5, 0.5))
         //.with_reporter(EvolveReporterSimple::new(1000))
         .build()
         .unwrap();
