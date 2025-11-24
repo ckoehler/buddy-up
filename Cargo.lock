@@ -1558,9 +1558,9 @@ dependencies = [
 
 [[package]]
 name = "genetic_algorithm"
-version = "0.23.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b792a84f9f28116fef655d8ce52201de59e1a6a31a2d25b43f6c670a1e777b7f"
+checksum = "f86dee9206444342e75ff3c0799597e8faec71d0f3cd778463fd8736fe8fffc6"
 dependencies = [
  "bytemuck",
  "cardinality-estimator",
