@@ -286,10 +286,14 @@ impl App {
 }
 
 fn main() -> iced::Result {
-    iced::application("Buddy Up", App::update, App::view)
+    // Use the new iced::application API: provide the boot, update and view
+    // functions directly. Set a static title via `title` and then run the
+    // application with `run()`.
+    iced::application(App::new, App::update, App::view)
+        .title("Buddy Up")
         .window(iced::window::Settings {
             size: iced::Size::new(450.0, 700.0),
             ..Default::default()
         })
-        .run_with(App::new)
+        .run()
 }
